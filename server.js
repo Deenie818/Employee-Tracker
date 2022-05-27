@@ -1,21 +1,24 @@
-const mysql = require("mysql");
+const mysql = require("mysql2");
 const inquirer = require("inquirer");
-const consoleTables = require("console.table");
+require("console.table")
 
 
-var managers = [];
-var roles = [];
-var departments = [];
-var employees = [];
+let managers = [];
+let roles = [];
+let departments = [];
+let employees = [];
 
 const connection = mysql.createConnection({
     host: "localhost",
-    port: 3301,
+    port: 3306,
     user: "root",
     password: "password",
     database: "employeesDB",
 });
-
+connection.connect(err=>{
+    if(err) throw err
+init()
+})
 const getManager = () => {
     connection.query(`SELECT manager, manager_id FROM managers`, (err, res) => {
         if (err) throw err;
@@ -77,7 +80,7 @@ const getEmployee = () => {
         if (err) throw err;
         employees = [];
         for (let i = 0; i < res.length; i++) {
-            const id = res[i].role_id;
+            const id = res[i].id;
             const firstName = res[i].first_name;
             const lastName = res[i].last_name;
             var newEmployees = {
@@ -105,7 +108,7 @@ const init = () => {
             choices: [
                 "View All Employees",
                 "View All Employees By Department",
-                "View All Employess By Manager",
+                "View All Employees By Manager",
                 "Add Employee",
                 "Add Department",
                 "Add Role",
@@ -113,7 +116,7 @@ const init = () => {
                 "Update Employee Role",
                 "Update Employee Manager",
                 "View All Roles",
-                "View ALL Departments",
+                "View All Departments",
                 "View All Managers",
                 "View Budget"
             ],
@@ -149,7 +152,7 @@ const init = () => {
                     break;
 
                 case "Update Employee Role":
-                    updateEmployee();
+                    updateRole();
                     break;
 
                 case "Update Employee Manager":
@@ -182,7 +185,7 @@ const init = () => {
 };
 
 const allDepartments = () => {
-    connection.query(`SELECT rold FROM department`, (err, res) => {
+    connection.query(`SELECT role FROM department`, (err, res) => {
         console.log("\nALL DEPARTMENTS\n");
         if (err) throw err;
         console.table(res);
@@ -223,11 +226,11 @@ const addRole = () => {
                 type: "list",
                 name: "department",
                 value: "What department does this role belong to?",
-                choice: departments
+                choices: departments
             }
 
         ])
-        .then((anwer) => {
+        .then((answer) => {
             connection.query(`INSERT INTO role (title, salary, department_id)
         VALUES("${answer.role}", ${answer.salary}, ${answer.department})`, (err, res) => {
                 if (err) throw err;
@@ -300,7 +303,7 @@ const updateRole = () => {
         ]).then((answer) => {
             connection.query(`UPDATE employee
         SET role_id = ${answer.role}
-        WHERE id = $(answer.employee);` , (err, res) => {
+        WHERE id = ${answer.employee};` , (err, res) => {
                 if (err) throw err;
                 init();
             }
@@ -319,7 +322,7 @@ const allManagers = () => {
 };
 
 const allEmployees = () => {
-    connection.query(`SELCT id, employee.first_name, employee.last_name, title, salary, department.role, managers.manager
+    connection.query(`SELECT id, employee.first_name, employee.last_name, title, salary, department.role, managers.manager
     FROM employee
     JOIN role ON employee.role_id = role.role_id
     JOIN department ON role.department_id = department.department_id
@@ -412,7 +415,7 @@ addEmployee = () => {
             {
                 type: 'list',
                 name: 'role',
-                message: 'What is your position?'
+                message: 'What is your position?',
                 choices: roles,
             },
             {
@@ -457,17 +460,23 @@ const removeEmployee = () => {
 };
 const viewBudget = () => {
     connection.query(`SELECT salary FROM employee
-    JOIN role ON employee.role.id = role.role_id
+    JOIN role ON employee.role_id = role.role_id
     JOIN department ON role.department_id = department.department_id
     LEFT JOIN managers on employee.manager_id = managers.manager_id`, (err,res) => {
         if (err) throw err;
         console.log(res);
         var budget= [];
         for (let i = 0; i <res.length; i++) {
-            
+            const addBudget = res[i].salary;
+            budget.push(+addBudget)
         }
+        var sum = budget.reduce(function(a,b){
+            return a + b;
+        }, 0);
+        console.log("TOTAL BUDGET")
+        console.log(sum)
+        init();
     })
 }
 
-init()
 
