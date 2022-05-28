@@ -1,12 +1,21 @@
 const mysql = require("mysql2");
 const inquirer = require("inquirer");
 require("console.table")
+const chalk = require("chalk");
 
 
 let managers = [];
 let roles = [];
 let departments = [];
 let employees = [];
+
+console.log(chalk.green.bold("==========================="));
+console.log(chalk.yellow(""));
+console.log(chalk.blue.bold("EMPLOYEE"));
+console.log(chalk.blue.bold("MANAGEMENT"));
+console.log(chalk.blue.bold("TRACKER"));
+console.log(chalk.yellow(""));
+console.log(chalk.green.bold("==========================="));
 
 const connection = mysql.createConnection({
     host: "localhost",
