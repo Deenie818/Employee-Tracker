@@ -1,4 +1,5 @@
-const mysql = require("mysql2");
+// dependencies
+const mysql = require("mysql");
 const inquirer = require("inquirer");
 require("console.table")
 const chalk = require("chalk");
@@ -16,7 +17,7 @@ console.log(chalk.blue.bold("MANAGEMENT"));
 console.log(chalk.blue.bold("TRACKER"));
 console.log(chalk.yellow(""));
 console.log(chalk.green.bold("==========================="));
-
+// connection
 const connection = mysql.createConnection({
     host: "localhost",
     port: 3306,
@@ -28,6 +29,8 @@ connection.connect(err=>{
     if(err) throw err
 init()
 })
+
+//pulls managers from database and insert into managers array
 const getManager = () => {
     connection.query(`SELECT manager, manager_id FROM managers`, (err, res) => {
         if (err) throw err;
@@ -46,7 +49,7 @@ const getManager = () => {
         // console.log(managers)
     });
 };
-
+//pulls departments from database and insert into departments array
 const getDepartments = () => {
     connection.query('SELECT role, department_id FROM department', (err, res) => {
         if (err) throw err;
@@ -64,7 +67,7 @@ const getDepartments = () => {
 
     });
 };
-
+//pulls roles from database and insert into roles array
 const getRole = () => {
     connection.query(`SELECT title, role_id FROM role`, (err, res) => {
         if (err) throw err;
@@ -83,7 +86,7 @@ const getRole = () => {
 
     })
 };
-
+//pulls employees from database and insert into employees array
 const getEmployee = () => {
     connection.query(`SELECT first_name, last_name, id FROM employee`, (err, res) => {
         if (err) throw err;
@@ -103,7 +106,7 @@ const getEmployee = () => {
     }
     );
 };
-
+//asks what the user wants to do in employee tracker
 const init = () => {
     getEmployee();
     getRole();
@@ -192,7 +195,7 @@ const init = () => {
             }
         });
 };
-
+//shows all departments
 const allDepartments = () => {
     connection.query(`SELECT role FROM department`, (err, res) => {
         console.log("\nALL DEPARTMENTS\n");
@@ -201,7 +204,7 @@ const allDepartments = () => {
         init();
     });
 };
-
+//allows user to add a new department
 const addDepartment = () => {
     inquirer
         .prompt({
@@ -217,7 +220,7 @@ const addDepartment = () => {
             })
         }))
 };
-
+//allows user to add a role
 const addRole = () => {
     inquirer
         .prompt([
@@ -247,7 +250,7 @@ const addRole = () => {
             })
         })
 };
-
+//user can select a manager
 const allEmployeeManagers = () => {
     inquirer
         .prompt({
@@ -266,7 +269,7 @@ const allEmployeeManagers = () => {
 
         });
 };
-
+//user can update manager
 const updateManager = () => {
     inquirer
         .prompt([{
@@ -293,7 +296,7 @@ const updateManager = () => {
 
         });
 };
-
+//user can update role
 const updateRole = () => {
     inquirer
         .prompt([
@@ -319,7 +322,7 @@ const updateRole = () => {
             );
         });
 };
-
+//shows all managers
 const allManagers = () => {
     connection.query(`SELECT manager FROM managers`, (err, res) => {
         if (err) throw err;
@@ -329,7 +332,7 @@ const allManagers = () => {
     });
 
 };
-
+//shows all employees
 const allEmployees = () => {
     connection.query(`SELECT id, employee.first_name, employee.last_name, title, salary, department.role, managers.manager
     FROM employee
@@ -343,7 +346,7 @@ const allEmployees = () => {
     });
 };
 
-
+//shows all roles
 const allRoles = () => {
     connection.query(`SELECT title FROM role`, (err, res) => {
         console.log("\nALL ROLES\n");
@@ -352,7 +355,7 @@ const allRoles = () => {
         init();
     });
 };
-
+//user can select a department
 const allEmployeeDepartments = () => {
     inquirer
         .prompt({
@@ -406,7 +409,7 @@ const allEmployeeDepartments = () => {
 
         });
 };
-
+//user can input a new employee
 addEmployee = () => {
     managers.push('none');
     inquirer
@@ -451,6 +454,8 @@ addEmployee = () => {
             }
         });
 };
+
+//user can remove an employee
 const removeEmployee = () => {
     inquirer
         .prompt({
@@ -467,6 +472,8 @@ const removeEmployee = () => {
             console.log(answer);
         });
 };
+
+//adds all salaries to calculate budget
 const viewBudget = () => {
     connection.query(`SELECT salary FROM employee
     JOIN role ON employee.role_id = role.role_id
